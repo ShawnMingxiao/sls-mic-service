@@ -1,0 +1,33 @@
+server:
+  port: 8761
+
+spring:
+  security:
+    user:
+      name: sls
+      password: sls
+  application:
+    name: eureka-server
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  instance:
+    hostname: eureka-server
+    prefer-ip-address: true
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    eviction-interval-timer-in-ms: 4000
+    enable-self-preservation: false
+    renewal-percent-threshold: 0.9
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
