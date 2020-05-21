@@ -1,5 +1,10 @@
 server:
   port: 9999
+  ssl:
+    enabled: true
+    key-store-password: 123456
+    key-store: classpath:server-cert.p12
+    key-store-type: PKCS12
 
 spring:
   application:
@@ -13,6 +18,38 @@ spring:
       discovery:
         enabled: true
         service-id: config-server
+    gateway:
+      httpclient:
+        ssl:
+          use-insecure-trust-manager: true
+          # For prod
+#          trustedX509Certificates:
+#            - cert1.pem
+#            - cert2.pem
+      routes:
+        - id: auth
+          # lb代表从注册中心获取服务
+          uri: lb://AUTH-SERVER
+          predicates:
+            # 转发该路径
+            - Path=/oauth/**
+        - id: product
+          uri: lb://PRODUCT-SERVER
+          predicates:
+            # 转发该路径
+            - Path=/product/**
+        - id: consumer
+          uri: lb://CONSUMER-SERVER
+          predicates:
+            # 转发该路径
+            - Path=/consumer/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: 'http://localhost:3000/oauth/.well-know/jwks.json'
+
   profiles:
     active: dev
   main:
@@ -25,5 +62,23 @@ eureka:
   client:
     service-url:
       defaultZone: http://sls:sls@localhost:8761/eureka/
+logging:
+  level:
+    org.springframework.web: DEBUG
+    reactor:
+      netty:
+        tcp:
+          TcpServer: off
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
+spring.boot.admin.client:
+  url: http://localhost:8080
+  instance:
+    metadata:
+      user.name: sls
+      user.password: sls

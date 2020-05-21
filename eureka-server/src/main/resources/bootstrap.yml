@@ -16,15 +16,19 @@ eureka:
   instance:
     hostname: eureka-server
     prefer-ip-address: true
+    metadata-map:
+      user.name: ${spring.security.user.name}
+      user.password: ${spring.security.user.password}
   client:
     register-with-eureka: false
     fetch-registry: false
     service-url:
-      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${eureka.instance.hostname}:${server.port}/eureka/
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@localhost:${server.port}/eureka/
   server:
     eviction-interval-timer-in-ms: 4000
     enable-self-preservation: false
     renewal-percent-threshold: 0.9
+
 
 management:
   endpoints:

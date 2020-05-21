@@ -1,11 +1,9 @@
 server:
-  port: 3000
+  port: 8081
 
 spring:
   application:
-    name: auth-server
-  profiles:
-    active: dev
+    name: product-server
   # 配置中心
   cloud:
     config:
@@ -15,10 +13,12 @@ spring:
       discovery:
         enabled: true
         service-id: config-server
+  profiles:
+    active: dev
   main:
     allow-bean-definition-overriding: true
 
-# 注册中心配置
+# 注册中心
 eureka:
   instance:
     prefer-ip-address: true
@@ -26,8 +26,20 @@ eureka:
     service-url:
       defaultZone: http://sls:sls@localhost:8761/eureka/
 
+##安全配置
+#security:
+#  oauth2:
+#    resource:
+#      token-info-uri: http://localhost:3000/oauth/check_token
+#      prefer-token-info: true
+#      jwt:
+#        key-uri: http://localhost:3000/oauth/token_key
+#
 management:
+  endpoint:
+    health:
+      show-details: always
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: *

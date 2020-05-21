@@ -49,6 +49,10 @@
         <module>config-server</module>
         <module>auth-server</module>
         <module>sls-common</module>
+        <module>gateway</module>
+        <module>product-server</module>
+        <module>consumer-server</module>
+        <module>admin-server</module>
     </modules>
 
     <dependencies>

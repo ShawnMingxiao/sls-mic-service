@@ -10,15 +10,17 @@ package com.hsbc.hub.ls.auth.controller;
 
 import com.hsbc.hub.ls.auth.entity.User;
 import com.hsbc.hub.ls.auth.service.UserService;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.KeyPair;
 import java.security.Principal;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Map;
 
 /**
  * @Author: Shawn Li
@@ -31,6 +33,9 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private KeyPair keyPair;
+
     @RequestMapping(value = "/current", method = RequestMethod.GET)
     public Principal getUser(Principal principal) {
         return principal;
@@ -40,5 +45,12 @@ public class AuthController {
     @RequestMapping(method = RequestMethod.POST)
     public void createUser(@Valid @RequestBody User user) {
         userService.create(user);
+    }
+
+    @GetMapping("/.well-know/jwks.json")
+    public Map<String, Object> getKey(){
+        RSAPublicKey publicKey = (RSAPublicKey)keyPair.getPublic();
+        com.nimbusds.jose.jwk.RSAKey key = new RSAKey.Builder(publicKey).build();
+        return new JWKSet(key).toJSONObject();
     }
 }

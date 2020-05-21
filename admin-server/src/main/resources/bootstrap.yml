@@ -1,9 +1,9 @@
 server:
-  port: 3000
+  port: 4000
 
 spring:
   application:
-    name: auth-server
+    name: admin-server
   profiles:
     active: dev
   # 配置中心
@@ -18,6 +18,11 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+  security:
+    user:
+      name: sls
+      password: sls
+
 # 注册中心配置
 eureka:
   instance:
@@ -26,8 +31,4 @@ eureka:
     service-url:
       defaultZone: http://sls:sls@localhost:8761/eureka/
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
+

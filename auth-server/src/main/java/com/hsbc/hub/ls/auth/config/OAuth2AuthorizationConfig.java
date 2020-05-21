@@ -11,12 +11,11 @@ package com.hsbc.hub.ls.auth.config;
 import com.hsbc.hub.ls.auth.service.security.LSUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -24,7 +23,11 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
+
+import java.security.KeyPair;
 
 /**
  * @Author: Shawn Li
@@ -35,7 +38,8 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 @EnableAuthorizationServer
 public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
-    private TokenStore tokenStore = new InMemoryTokenStore();
+    @Autowired
+    private TokenStore tokenStore;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -50,6 +54,26 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private Environment env;
 
+    @Bean
+    public KeyPair keyPair(){
+        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource("test-jwt.jks"), "test123".toCharArray());
+        return keyStoreKeyFactory.getKeyPair("test-jwt","test123".toCharArray());
+    }
+
+    @Bean
+    public JwtAccessTokenConverter jwtAccessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setKeyPair(keyPair());
+        return converter;
+    }
+
+    @Bean
+    public TokenStore tokenStore() {
+        return new JwtTokenStore(jwtAccessTokenConverter());
+    }
+
+
+
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 
@@ -61,16 +85,19 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
                 .and()
                 .withClient("client_2")
                 .secret(finalSecret)
-                .authorizedGrantTypes("client_credentials","password")
-                .scopes("server");
+                .authorizedGrantTypes("password","password")
+                .scopes("server")
+                .accessTokenValiditySeconds(60 * 30)
+                .refreshTokenValiditySeconds(60);
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(tokenStore)
+                .tokenStore(tokenStore) //指定token存储位置
                 .authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService);
+                .userDetailsService(userDetailsService)
+                .accessTokenConverter(jwtAccessTokenConverter());// 配置JwtAccessToken转换器
     }
 
     @Override

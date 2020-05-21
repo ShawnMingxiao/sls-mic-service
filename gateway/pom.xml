@@ -16,6 +16,7 @@
 
 
     <dependencies>
+        <!--gateway 网关依赖,内置webflux 依赖-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
@@ -27,11 +28,28 @@
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
 
+
         <dependency>
-            <groupId>com.hsbc.hub.ls</groupId>
-            <artifactId>sls-common-security</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-oauth2</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!--Spring Security-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>com.nimbusds</groupId>-->
+<!--            <artifactId>nimbus-jose-jwt</artifactId>-->
+<!--            <version>8.2</version>-->
+<!--        </dependency>-->
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -43,6 +61,12 @@
                     <artifactId>junit-vintage-engine</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.3</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -64,6 +88,21 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration><encoding>UTF-8</encoding>
+                    <!-- 过滤后缀为pem、pfx的证书文件 -->
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>cer</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>pem</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>pfx</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>p12</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
